@@ -15,12 +15,18 @@ var gitLabOauthOptions =
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddGitLab(options =>
-    {
-        options.ClientId = gitLabOauthOptions.ClientId;
-        options.ClientSecret = gitLabOauthOptions.ClientSecret;
-        options.CallbackPath = gitLabOauthOptions.CallbackPath;
-    });
+    .AddGitLab(
+        GitLabOauthOptions.GitLabOauth,
+        options =>
+        {
+            options.UsePkce = true;
+            options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+            options.ClientId = gitLabOauthOptions.ClientId;
+            options.ClientSecret = gitLabOauthOptions.ClientSecret;
+            options.CallbackPath = gitLabOauthOptions.CallbackPath;
+        }
+    );
 
 builder.Services.AddControllers(options => options.UseSlugCaseRoutes());
 
