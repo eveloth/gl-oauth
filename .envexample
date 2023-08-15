@@ -1,5 +1,16 @@
 # APP_HOST=''
 APP_PORT=6001
+
 GITLAB__CLIENTID=''
 GITLAB__CLIENTSECRET=''
 GITLAB__CALLBACKPATH='/gl-oauth'
+
+PG_DB='gl-oauth_db'
+PG_USER='gl-oauth-pguser'
+PG_PASS=''
+#POSTGRES_PORT=''
+
+CORS__ROOTDOMAIN=''
+CORS__ISLOCAL='true'
+
+CONNECTIONSTRINGS__DEFAULT="Server=gl-oauth.postgres;Port=5432;Database=${PG_DB};User Id=${PG_USER};Password=${PG_PASS};"

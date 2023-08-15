@@ -1,33 +1,47 @@
 using Chemodanchik.Mvc;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using OauthShowcase.Options;
+using MapsterMapper;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using OauthShowcase;
+using OauthShowcase.Data;
+using OauthShowcase.Installers;
+using OauthShowcase.Mapping;
+using OauthShowcase.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.Configure<GitLabOauthOptions>(
-    builder.Configuration.GetSection(GitLabOauthOptions.GitLabOauth)
+builder.InstallAuthentication();
+builder.InstallSubdomainWildcardCorsPolicy();
+
+builder.Services.AddDbContext<ApplicationContext>(
+    optionsBuilder => optionsBuilder.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
 );
 
-var gitLabOauthOptions =
-    builder.Configuration.GetSection(GitLabOauthOptions.GitLabOauth).Get<GitLabOauthOptions>()
-    ?? throw new NullReferenceException(nameof(GitLabOauthOptions));
-
-builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddGitLab(options =>
-    {
-        options.ClientId = gitLabOauthOptions.ClientId;
-        options.ClientSecret = gitLabOauthOptions.ClientSecret;
-        options.CallbackPath = gitLabOauthOptions.CallbackPath;
-    });
+builder.Services.AddScoped<IUserManagement, UserManagement>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<IMapper, Mapper>();
 
 builder.Services.AddControllers(options => options.UseSlugCaseRoutes());
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.ConfigureDomainToResponseMapping();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+    await context.Database.MigrateAsync();
+}
+
+app.UseForwardedHeaders(
+    new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    }
+);
 
 if (app.Environment.IsDevelopment())
 {
@@ -35,9 +49,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+
+await app.RunAsync();
