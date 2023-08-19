@@ -11,6 +11,8 @@
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.GitLab" Version="7.0.2" />
     <PackageReference Include="Chemodanchik" Version="1.0.0" />
+    <PackageReference Include="FluentValidation" Version="11.7.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.7.1" />
     <PackageReference Include="Mapster" Version="7.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.10" />
@@ -29,5 +31,6 @@
     </Content>
 
   </ItemGroup>
+
 
 </Project>

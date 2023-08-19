@@ -5,5 +5,6 @@ public record UserinfoResponse(
     string Email,
     string FirstName,
     string LastName,
-    string? GitlabUsername
+    string? GitlabUsername,
+    string? Avatar
 );

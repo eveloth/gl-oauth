@@ -115,4 +115,35 @@ public class UserManagement : IUserManagement
 
         await _context.SaveChangesAsync(ct);
     }
+
+    public async Task ChangeAvatar(int userId, IFormFile avatar, CancellationToken ct)
+    {
+        var existingUser = await _context.Users.SingleOrDefaultAsync(x => x.Id == userId, ct);
+
+        if (existingUser is null)
+        {
+            throw new ApiException("User doesn't exist");
+        }
+
+        using (var memoryStream = new MemoryStream())
+        {
+            await avatar.CopyToAsync(memoryStream, ct);
+            existingUser.Avatar = memoryStream.ToArray();
+        }
+
+        await _context.SaveChangesAsync(ct);
+    }
+
+    public async Task DeleteAvatar(int userId, CancellationToken ct)
+    {
+        var existingUser = await _context.Users.SingleOrDefaultAsync(x => x.Id == userId, ct);
+
+        if (existingUser is null)
+        {
+            throw new ApiException("User doesn't exist");
+        }
+
+        existingUser.Avatar = null;
+        await _context.SaveChangesAsync(ct);
+    }
 }

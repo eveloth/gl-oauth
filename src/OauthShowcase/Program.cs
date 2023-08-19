@@ -1,4 +1,5 @@
 using Chemodanchik.Mvc;
+using FluentValidation;
 using MapsterMapper;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +8,7 @@ using OauthShowcase;
 using OauthShowcase.Data;
 using OauthShowcase.Installers;
 using OauthShowcase.Mapping;
+using OauthShowcase.Options;
 using OauthShowcase.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,9 +20,14 @@ builder.Services.AddDbContext<ApplicationContext>(
     optionsBuilder => optionsBuilder.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
 );
 
+builder.Services.Configure<AvatarValidationOptions>(
+    builder.Configuration.GetSection(AvatarValidationOptions.AvatarValidation)
+);
+
 builder.Services.AddScoped<IUserManagement, UserManagement>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IMapper, Mapper>();
+builder.Services.AddValidatorsFromAssemblyContaining(typeof(IAssemblyMarker));
 
 builder.Services.AddControllers(options => options.UseSlugCaseRoutes());
 builder.Services.AddEndpointsApiExplorer();

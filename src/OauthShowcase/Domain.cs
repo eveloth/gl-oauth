@@ -10,6 +10,7 @@ public sealed record User(string Email, string FirstName, string LastName)
 {
     public int Id { get; init; }
     public string PasswordHash { get; set; } = default!;
+    public byte[]? Avatar { get; set; }
     public ExternalData? ExternalData { get; set; }
 
     public ClaimsPrincipal ToPrincipal()

@@ -13,6 +13,10 @@ public static class MappingExtensions
                 dest => dest.GitlabUsername,
                 src => src.ExternalData == null ? null : src.ExternalData.ExternalUserName
             )
+            .Map(
+                dest => dest.Avatar,
+                src => src.Avatar == null ? null : Convert.ToBase64String(src.Avatar)
+            )
             .IgnoreNonMapped(false);
     }
 }

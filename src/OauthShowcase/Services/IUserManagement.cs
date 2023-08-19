@@ -10,4 +10,6 @@ public interface IUserManagement
     Task Delete(int userId, CancellationToken ct);
     Task<User?> Login(string email, string password, CancellationToken ct);
     Task AddExternalData(int userId, ExternalData externalData, CancellationToken ct);
+    Task ChangeAvatar(int userId, IFormFile avatar, CancellationToken ct);
+    Task DeleteAvatar(int userId, CancellationToken ct);
 }

@@ -83,14 +83,6 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet]
-    [Route("users")]
-    public async Task<IActionResult> GetUsers(CancellationToken ct)
-    {
-        var users = await _userManagement.GetAll(ct);
-        return Ok(_mapper.Map<List<UserinfoResponse>>(users));
-    }
-
-    [HttpGet]
     [Route("login-gitlab")]
     public IActionResult LoginGitLab()
     {
