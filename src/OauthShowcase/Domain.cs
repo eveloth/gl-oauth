@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using AspNet.Security.OAuth.GitLab;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using OauthShowcase.Identity;
 
 namespace OauthShowcase;
@@ -63,27 +63,26 @@ public sealed record ExternalData(
     public string RefreshToken { get; set; } = RefreshToken;
     public DateTime TokenExpiryDate { get; set; } = TokenExpiryDate;
 
-    public static ExternalData FromAuthenticateResult(int userId, AuthenticateResult result)
+    public static ExternalData FromOauthContext(int userId, OAuthCreatingTicketContext context)
     {
-        var tokens = result.Properties?.GetTokens().ToList()!;
+        var accessToken = context.AccessToken!;
+        var refreshToken = context.RefreshToken;
+        var expiryDate = DateTime.UtcNow.Add(context.ExpiresIn!.Value);
 
-        var externalUserId = result.Principal!.Claims
+        var externalUserId = context.Principal!.Claims
             .Single(x => x.Type == ClaimTypes.NameIdentifier)
             .Value;
-        var externalUserName = result.Principal.Claims.Single(x => x.Type == ClaimTypes.Name).Value;
-        var accessToken = tokens.Single(x => x.Name == "access_token").Value;
-        var refreshToken = tokens.Single(x => x.Name == "refresh_token").Value;
-        var expiryDate = DateTime
-            .Parse(tokens.Single(x => x.Name == "expires_at").Value)
-            .ToUniversalTime();
+        var externalUserName = context.Principal!.Claims
+            .Single(x => x.Type == ClaimTypes.Name)
+            .Value;
 
         return new ExternalData(
             userId,
             GitLabAuthenticationDefaults.AuthenticationScheme,
             externalUserId,
             externalUserName,
-            accessToken,
-            refreshToken,
+            accessToken!,
+            refreshToken!,
             expiryDate
         );
     }
