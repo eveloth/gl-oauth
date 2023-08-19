@@ -59,6 +59,19 @@ public class UserManagement : IUserManagement
         return await _context.Users.Include(x => x.ExternalData).ToListAsync(ct);
     }
 
+    public async Task Delete(int userId, CancellationToken ct)
+    {
+        var existingUser = await _context.Users.SingleOrDefaultAsync(x => x.Id == userId, ct);
+
+        if (existingUser is null)
+        {
+            throw new ApiException("User doesn't exist");
+        }
+
+        _context.Users.Remove(existingUser);
+        await _context.SaveChangesAsync(ct);
+    }
+
     public async Task<User?> Login(string email, string password, CancellationToken ct)
     {
         var existingUser = await _context.Users.SingleOrDefaultAsync(x => x.Email == email, ct);
