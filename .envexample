@@ -13,4 +13,7 @@ PG_PASS=''
 CORS__ROOTDOMAIN=''
 CORS__ISLOCAL='true'
 
+SPA__ENABLED='false'
+SPA__MAINPAGEURL=''
+
 CONNECTIONSTRINGS__DEFAULT="Server=gl-oauth.postgres;Port=5432;Database=${PG_DB};User Id=${PG_USER};Password=${PG_PASS};"

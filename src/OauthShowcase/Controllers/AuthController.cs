@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using OauthShowcase.Contracts;
 using OauthShowcase.Identity;
+using OauthShowcase.Options;
 using OauthShowcase.Services;
 
 namespace OauthShowcase.Controllers;
@@ -16,11 +18,17 @@ public class AuthController : ControllerBase
 {
     private readonly IUserManagement _userManagement;
     private readonly IMapper _mapper;
+    private readonly SpaOptions _spaOptions;
 
-    public AuthController(IUserManagement userManagement, IMapper mapper)
+    public AuthController(
+        IUserManagement userManagement,
+        IMapper mapper,
+        IOptions<SpaOptions> spaOptions
+    )
     {
         _userManagement = userManagement;
         _mapper = mapper;
+        _spaOptions = spaOptions.Value;
     }
 
     [HttpPost]
@@ -86,8 +94,10 @@ public class AuthController : ControllerBase
     [Route("login-gitlab")]
     public IActionResult LoginGitLab()
     {
+        var redirectUri = _spaOptions.Enabled ? _spaOptions.MainPageUrl : "/";
+
         return Challenge(
-            new AuthenticationProperties { RedirectUri = "/" },
+            new AuthenticationProperties { RedirectUri = redirectUri },
             GitLabAuthenticationDefaults.AuthenticationScheme
         );
     }
