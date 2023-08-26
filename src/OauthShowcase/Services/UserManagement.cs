@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OauthShowcase.Data;
+using OauthShowcase.Domain;
 using OauthShowcase.Errors;
 
 namespace OauthShowcase.Services;
@@ -16,12 +17,12 @@ public class UserManagement : IUserManagement
         _passwordHasher = passwordHasher;
     }
 
-    public async Task Create(User user, CancellationToken ct)
+    public async Task Create(User user, CancellationToken ct = default!)
     {
         await Create(user, string.Empty, ct);
     }
 
-    public async Task Create(User user, string password, CancellationToken ct)
+    public async Task Create(User user, string password, CancellationToken ct = default!)
     {
         var existingUser = await _context.Users.SingleOrDefaultAsync(
             x => x.Email == user.Email,
@@ -40,26 +41,26 @@ public class UserManagement : IUserManagement
         await _context.SaveChangesAsync(ct);
     }
 
-    public async Task<User?> Get(int userId, CancellationToken ct)
+    public async Task<User?> Get(int userId, CancellationToken ct = default!)
     {
         return await _context.Users
             .Include(x => x.ExternalData)
             .SingleOrDefaultAsync(x => x.Id == userId, ct);
     }
 
-    public async Task<User?> Get(string email, CancellationToken ct)
+    public async Task<User?> Get(string email, CancellationToken ct = default!)
     {
         return await _context.Users
             .Include(x => x.ExternalData)
             .SingleOrDefaultAsync(x => x.Email == email, ct);
     }
 
-    public async Task<List<User>> GetAll(CancellationToken ct)
+    public async Task<List<User>> GetAll(CancellationToken ct = default!)
     {
         return await _context.Users.Include(x => x.ExternalData).ToListAsync(ct);
     }
 
-    public async Task Delete(int userId, CancellationToken ct)
+    public async Task Delete(int userId, CancellationToken ct = default!)
     {
         var existingUser = await _context.Users.SingleOrDefaultAsync(x => x.Id == userId, ct);
 
@@ -72,25 +73,11 @@ public class UserManagement : IUserManagement
         await _context.SaveChangesAsync(ct);
     }
 
-    public async Task<User?> Login(string email, string password, CancellationToken ct)
-    {
-        var existingUser = await _context.Users.SingleOrDefaultAsync(x => x.Email == email, ct);
-
-        if (existingUser is null)
-        {
-            return existingUser;
-        }
-
-        var verificationResult = _passwordHasher.VerifyHashedPassword(
-            existingUser,
-            existingUser.PasswordHash,
-            password
-        );
-
-        return verificationResult != PasswordVerificationResult.Success ? null : existingUser;
-    }
-
-    public async Task AddExternalData(int userId, ExternalData externalData, CancellationToken ct)
+    public async Task AddExternalData(
+        int userId,
+        ExternalData externalData,
+        CancellationToken ct = default!
+    )
     {
         var existingUser = await _context.Users
             .Include(user => user.ExternalData)
@@ -116,7 +103,7 @@ public class UserManagement : IUserManagement
         await _context.SaveChangesAsync(ct);
     }
 
-    public async Task ChangeAvatar(int userId, IFormFile avatar, CancellationToken ct)
+    public async Task ChangeAvatar(int userId, IFormFile avatar, CancellationToken ct = default!)
     {
         var existingUser = await _context.Users.SingleOrDefaultAsync(x => x.Id == userId, ct);
 
@@ -134,7 +121,7 @@ public class UserManagement : IUserManagement
         await _context.SaveChangesAsync(ct);
     }
 
-    public async Task DeleteAvatar(int userId, CancellationToken ct)
+    public async Task DeleteAvatar(int userId, CancellationToken ct = default!)
     {
         var existingUser = await _context.Users.SingleOrDefaultAsync(x => x.Id == userId, ct);
 

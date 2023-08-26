@@ -1,15 +1,16 @@
-﻿namespace OauthShowcase.Services;
+﻿using OauthShowcase.Domain;
+
+namespace OauthShowcase.Services;
 
 public interface IUserManagement
 {
-    Task Create(User user, CancellationToken ct);
-    Task Create(User user, string password, CancellationToken ct);
-    Task<User?> Get(int userId, CancellationToken ct);
-    Task<User?> Get(string email, CancellationToken ct);
-    Task<List<User>> GetAll(CancellationToken ct);
-    Task Delete(int userId, CancellationToken ct);
-    Task<User?> Login(string email, string password, CancellationToken ct);
-    Task AddExternalData(int userId, ExternalData externalData, CancellationToken ct);
-    Task ChangeAvatar(int userId, IFormFile avatar, CancellationToken ct);
-    Task DeleteAvatar(int userId, CancellationToken ct);
+    Task Create(User user, CancellationToken ct = default!);
+    Task Create(User user, string password, CancellationToken ct = default!);
+    Task<User?> Get(int userId, CancellationToken ct = default!);
+    Task<User?> Get(string email, CancellationToken ct = default!);
+    Task<List<User>> GetAll(CancellationToken ct = default!);
+    Task Delete(int userId, CancellationToken ct = default!);
+    Task AddExternalData(int userId, ExternalData externalData, CancellationToken ct = default!);
+    Task ChangeAvatar(int userId, IFormFile avatar, CancellationToken ct = default!);
+    Task DeleteAvatar(int userId, CancellationToken ct = default!);
 }

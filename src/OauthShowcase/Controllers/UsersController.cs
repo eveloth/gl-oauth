@@ -1,5 +1,6 @@
 using FluentValidation;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OauthShowcase.Contracts;
@@ -57,6 +58,17 @@ public class UsersController : ControllerBase
         var userId = int.Parse(User.Claims.Single(x => x.Type == Claims.Subject).Value);
 
         await _userManagement.DeleteAvatar(userId, ct);
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpDelete]
+    [Route("purge")]
+    public async Task<IActionResult> Purge(CancellationToken ct)
+    {
+        var userId = int.Parse(User.Claims.Single(x => x.Type == Claims.Subject).Value);
+        await _userManagement.Delete(userId, ct);
+        await HttpContext.SignOutAsync();
         return Ok();
     }
 }

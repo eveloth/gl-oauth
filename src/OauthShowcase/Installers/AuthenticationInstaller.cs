@@ -2,6 +2,7 @@
 using AspNet.Security.OAuth.GitLab;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using OauthShowcase.Domain;
 using OauthShowcase.Options;
 using OauthShowcase.Services;
 

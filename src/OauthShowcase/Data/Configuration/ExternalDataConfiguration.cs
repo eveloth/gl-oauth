@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using OauthShowcase.Domain;
 
 namespace OauthShowcase.Data.Configuration;
 

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style type="text/css">
+        .confirm {
+            font: bold 11px Arial;
+            background-color: cornflowerblue;
+            color: #fefefe;
+            padding: 10px 20px;
+        }
+    </style>
+    <base href = "http://localhost:6001/">
+</head>
+<body>
+<h2>Hi, {{FirstName}}!</h2>
+<p>Please confirm your registration by clicking a button below:</p>
+<br>
+<a class="confirm" href="/auth/confirm/{{Id}}?confirmationToken={{ConfirmationToken}}">Confirm</a>
+
+</body>
+</html>

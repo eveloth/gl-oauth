@@ -7,6 +7,7 @@ using OauthShowcase.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpContextAccessor();
 builder.InstallAuthentication();
 builder.InstallSubdomainWildcardCorsPolicy();
 
@@ -15,6 +16,7 @@ builder.Services.AddDbContext<ApplicationContext>(
 );
 
 builder.ConfigureOptions();
+builder.InstallFluentEmail();
 builder.InstallServices();
 
 builder.Services.AddControllers(options => options.UseSlugCaseRoutes());
@@ -28,7 +30,9 @@ app.ConfigureDomainToResponseMapping();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+    var seeder = scope.ServiceProvider.GetRequiredService<Seeder>();
     await context.Database.MigrateAsync();
+    await seeder.InitializeDatabase();
 }
 
 app.UseForwardedHeaders(

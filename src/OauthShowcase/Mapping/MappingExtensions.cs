@@ -1,5 +1,6 @@
 ﻿using Mapster;
 using OauthShowcase.Contracts;
+using OauthShowcase.Domain;
 
 namespace OauthShowcase.Mapping;
 

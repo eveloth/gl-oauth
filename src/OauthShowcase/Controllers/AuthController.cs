@@ -1,11 +1,11 @@
 using AspNet.Security.OAuth.GitLab;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using OauthShowcase.Contracts;
+using OauthShowcase.Domain;
 using OauthShowcase.Identity;
 using OauthShowcase.Options;
 using OauthShowcase.Services;
@@ -16,6 +16,7 @@ namespace OauthShowcase.Controllers;
 [ApiController]
 public class AuthController : ControllerBase
 {
+    private readonly IAuthenticator _authenticator;
     private readonly IUserManagement _userManagement;
     private readonly IMapper _mapper;
     private readonly SpaOptions _spaOptions;
@@ -23,11 +24,13 @@ public class AuthController : ControllerBase
     public AuthController(
         IUserManagement userManagement,
         IMapper mapper,
-        IOptions<SpaOptions> spaOptions
+        IOptions<SpaOptions> spaOptions,
+        IAuthenticator authenticator
     )
     {
         _userManagement = userManagement;
         _mapper = mapper;
+        _authenticator = authenticator;
         _spaOptions = spaOptions.Value;
     }
 
@@ -36,27 +39,38 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register(RegisterRequest request, CancellationToken ct)
     {
         var newUser = new User(request.Email, request.FirstName, request.LastName);
-        await _userManagement.Create(newUser, request.Password, ct);
-        return Ok();
+        var registrationSuccessful = await _authenticator.Register(newUser, request.Password, ct);
+
+        return registrationSuccessful ? Ok() : BadRequest();
+    }
+
+    [HttpGet]
+    [Route("confirm/{id:int}")]
+    public async Task<IActionResult> ConfirmRegistration(
+        [FromRoute] int id,
+        [FromQuery] Guid confirmationToken,
+        CancellationToken ct
+    )
+    {
+        return await _authenticator.ConfirmRegistration(id, confirmationToken, ct)
+            ? Ok()
+            : BadRequest();
     }
 
     [HttpPost]
     [Route("login")]
     public async Task<IActionResult> Login(LoginRequest request, CancellationToken ct)
     {
-        var existingUser = await _userManagement.Login(request.Email, request.Password, ct);
+        var existingUser = await _userManagement.Get(request.Email, ct);
 
-        if (existingUser is null)
+        if (existingUser is null || !existingUser.Confirmed)
         {
-            return Unauthorized();
+            return BadRequest();
         }
 
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            existingUser.ToPrincipal()
-        );
+        var authResult = await _authenticator.SignIn(existingUser, request.Password, ct);
 
-        return Ok();
+        return authResult ? Ok() : BadRequest();
     }
 
     [Authorize]
@@ -77,17 +91,6 @@ public class AuthController : ControllerBase
         var existingUser = await _userManagement.Get(userId, ct);
 
         return Ok(_mapper.Map<UserinfoResponse>(existingUser!));
-    }
-
-    [Authorize]
-    [HttpPost]
-    [Route("purge")]
-    public async Task<IActionResult> Purge(CancellationToken ct)
-    {
-        var userId = int.Parse(User.Claims.Single(x => x.Type == Claims.Subject).Value);
-        await _userManagement.Delete(userId, ct);
-        await HttpContext.SignOutAsync();
-        return Ok();
     }
 
     [HttpGet]
