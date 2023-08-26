@@ -64,6 +64,8 @@ public class Authenticator : IAuthenticator
 
         if (!confirmEmail)
         {
+            user.Confirmed = true;
+            await _context.SaveChangesAsync(ct);
             return true;
         }
 
